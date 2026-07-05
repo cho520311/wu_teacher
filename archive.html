@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>詩詞吟唱典藏</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #efe6d3;
+    --paper-deep: #e5d9c1;
+    --card: #faf5e9;
+    --ink: #211d18;
+    --ink-soft: #5c5346;
+    --seal: #a6332b;
+    --seal-deep: #832620;
+    --gold: #a98a54;
+    --gold-line: rgba(169,138,84,0.35);
+    --radius: 14px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background: var(--paper);
+    background-image:
+      radial-gradient(ellipse at top left, rgba(169,138,84,0.10), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(166,51,43,0.06), transparent 50%);
+    color: var(--ink);
+    font-family: 'Noto Sans TC', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+  }
+  .wrap{
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 16px 64px;
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: linear-gradient(var(--paper) 82%, rgba(239,230,211,0));
+    padding: 22px 0 14px;
+  }
+  .titlebar{
+    display:flex;
+    align-items:center;
+    gap: 14px;
+  }
+  .seal{
+    flex: 0 0 auto;
+    width: 46px;
+    height: 46px;
+    border-radius: 6px;
+    background: var(--seal);
+    color: #f4e9d8;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 900;
+    font-size: 20px;
+    letter-spacing: 1px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.15), inset 0 0 0 1px rgba(255,255,255,0.15);
+    transform: rotate(-2deg);
+  }
+  h1{
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 900;
+    font-size: 26px;
+    margin: 0;
+    letter-spacing: 1px;
+    line-height: 1.15;
+  }
+  .sub{
+    margin: 3px 0 0;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    letter-spacing: 0.5px;
+  }
+  .brush-divider{
+    width: 100%;
+    height: 10px;
+    margin-top: 14px;
+    opacity: 0.55;
+  }
+
+  /* ---------- Search ---------- */
+  .search-box{
+    margin-top: 16px;
+    position: relative;
+  }
+  .search-box input{
+    width: 100%;
+    padding: 13px 44px 13px 16px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--gold-line);
+    background: var(--card);
+    font-size: 16px;
+    font-family: 'Noto Sans TC', sans-serif;
+    color: var(--ink);
+    outline: none;
+    box-shadow: 0 1px 2px rgba(33,29,24,0.05);
+  }
+  .search-box input:focus{
+    border-color: var(--seal);
+    box-shadow: 0 0 0 3px rgba(166,51,43,0.12);
+  }
+  .search-box input::placeholder{ color: #9c9182; }
+  .search-icon{
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    stroke: var(--ink-soft);
+    pointer-events: none;
+  }
+
+  /* ---------- Filter chips ---------- */
+  .filters{
+    display:flex;
+    gap: 8px;
+    margin-top: 12px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .filters::-webkit-scrollbar{ display:none; }
+  select{
+    -webkit-appearance:none;
+    appearance:none;
+    flex: 0 0 auto;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13px;
+    padding: 8px 30px 8px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--gold-line);
+    background: var(--card) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="6"><path d="M0 0l5 6 5-6z" fill="%235c5346"/></svg>') no-repeat right 12px center;
+    color: var(--ink-soft);
+    max-width: 150px;
+  }
+  select.active{
+    border-color: var(--seal);
+    color: var(--seal-deep);
+    background-color: #fbeceb;
+  }
+
+  .meta-row{
+    display:flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin: 18px 2px 10px;
+    font-size: 12.5px;
+    color: var(--ink-soft);
+  }
+  .meta-row .count b{ color: var(--seal-deep); font-size: 14px; }
+  .sync-row{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    margin: 2px 2px 0;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    opacity: 0.85;
+  }
+  .sync-row #refreshBtn{ color: var(--seal-deep); }
+  .spin{ animation: spin 1s linear infinite; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+  .clear-btn{
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    font-size: 12.5px;
+    cursor:pointer;
+    padding: 0;
+    font-family: 'Noto Sans TC', sans-serif;
+  }
+
+  /* ---------- Cards ---------- */
+  #results{ display:flex; flex-direction:column; gap:10px; }
+  .card{
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    border: 1px solid rgba(33,29,24,0.06);
+    box-shadow: 0 1px 2px rgba(33,29,24,0.04);
+    display:flex;
+    flex-direction:column;
+    gap: 6px;
+    text-decoration:none;
+    color: inherit;
+    position: relative;
+    overflow:hidden;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .card:active{ transform: scale(0.985); }
+  .card::before{
+    content:"";
+    position:absolute;
+    left:0; top:0; bottom:0;
+    width: 3px;
+    background: var(--gold);
+    opacity: 0.55;
+  }
+  .card-top{
+    display:flex;
+    align-items:baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .poem-title{
+    font-family: 'Noto Serif TC', serif;
+    font-weight: 700;
+    font-size: 17px;
+    color: var(--ink);
+  }
+  .author-tag{
+    font-size: 12px;
+    color: var(--seal-deep);
+    background: rgba(166,51,43,0.08);
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  .orig-title{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    line-height: 1.5;
+    word-break: break-all;
+  }
+  .card-bottom{
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .badges{ display:flex; gap:6px; flex-wrap:wrap; }
+  .badge{
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: rgba(92,83,70,0.08);
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .badge.festival{ color: var(--seal-deep); background: rgba(166,51,43,0.07); }
+  .go{
+    font-size: 12.5px;
+    color: var(--gold);
+    font-weight: 700;
+    white-space: nowrap;
+    display:flex;
+    align-items:center;
+    gap: 3px;
+  }
+
+  .empty{
+    text-align:center;
+    padding: 60px 20px;
+    color: var(--ink-soft);
+  }
+  .empty svg{ width:56px; height:56px; opacity:0.35; margin-bottom:12px; stroke: var(--ink-soft); }
+  .empty p{ font-family:'Noto Serif TC', serif; font-size:16px; margin: 4px 0 0; }
+
+  .sentinel{ height: 1px; }
+  .loading-more{
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: 12.5px;
+    padding: 14px 0;
+  }
+
+  footer{
+    text-align:center;
+    margin-top: 30px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .card{ transition:none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="titlebar">
+      <div class="seal">錫口</div>
+      <div>
+        <h1>詩詞吟唱典藏</h1>
+        <p class="sub">可在手機查詢・完全免費・資料即時同步自 Google 試算表</p>
+      </div>
+    </div>
+    <svg class="brush-divider" viewBox="0 0 700 10" preserveAspectRatio="none">
+      <path d="M2,5 C120,1 260,9 400,4 C500,1 600,7 698,3" stroke="#a98a54" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </svg>
+    <div class="search-box">
+      <input id="q" type="search" placeholder="搜尋詩題、作者或吟唱者，例如：李白、將進酒" autocomplete="off">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </div>
+    <div class="filters">
+      <select id="fAuthor"><option value="">全部作者</option></select>
+      <select id="fReciter"><option value="">全部朗誦／吟唱者</option></select>
+      <select id="fFestival"><option value="">全部節日</option></select>
+    </div>
+    <div class="meta-row">
+      <span class="count">共 <b id="countNum">0</b> 筆</span>
+      <button class="clear-btn" id="clearBtn">清除條件</button>
+    </div>
+    <div class="sync-row" id="syncRow">
+      <span id="syncStatus">正在連線 Google 試算表…</span>
+      <button class="clear-btn" id="refreshBtn" style="display:none;">重新整理</button>
+    </div>
+  </header>
+
+  <div id="loadingState" class="empty">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round" class="spin"><path d="M21 12a9 9 0 1 1-9-9"/></svg>
+    <p>正在讀取最新資料…</p>
+  </div>
+  <div id="errorState" class="empty" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M12 9v4M12 17h.01M10.3 3.86l-8.2 14.2A2 2 0 0 0 3.8 21h16.4a2 2 0 0 0 1.7-3L13.7 3.86a2 2 0 0 0-3.4 0z"/></svg>
+    <p id="errorMsg">讀取失敗，請檢查網路連線</p>
+    <button class="clear-btn" id="retryBtn">重試</button>
+  </div>
+
+  <div id="results" style="display:none;"></div>
+  <div class="sentinel" id="sentinel"></div>
+  <div class="loading-more" id="loadingMore" style="display:none;">載入更多…</div>
+
+  <footer>資料來源：Google 試算表（即時讀取）・點擊卡片於新分頁開啟影片</footer>
+</div>
+
+<script>
+(function(){
+  // ---- Google 試算表設定 ----
+  // 試算表 ID 與分頁 gid，取自你提供的分享連結
+  const SHEET_ID = '1AQbT-pYd9J2FrKw4WLLm0-X391ngJXI7uzjMAZrzvAE';
+  const GID = '0';
+  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&_t=` + Date.now();
+
+  // 簡易但完整的 CSV 解析器：支援雙引號欄位、欄位內逗號與換行
+  function parseCSV(text){
+    const rows = [];
+    let row = [], field = '', inQuotes = false;
+    for(let i=0; i<text.length; i++){
+      const c = text[i], next = text[i+1];
+      if(inQuotes){
+        if(c === '"' && next === '"'){ field += '"'; i++; }
+        else if(c === '"'){ inQuotes = false; }
+        else{ field += c; }
+      } else {
+        if(c === '"'){ inQuotes = true; }
+        else if(c === ','){ row.push(field); field=''; }
+        else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+        else if(c === '\r'){ /* skip */ }
+        else{ field += c; }
+      }
+    }
+    if(field.length || row.length){ row.push(field); rows.push(row); }
+    return rows;
+  }
+
+  function rowsToData(rows){
+    const out = [];
+    // 第一列是標題列，從第二列開始讀取
+    for(let i=1; i<rows.length; i++){
+      const r = rows[i];
+      if(!r || r.length < 2) continue;
+      const [t, u, a, f, p, rec] = r;
+      if(!u || !u.trim()) continue;
+      out.push({
+        t: (t||'').trim(),
+        u: u.trim(),
+        a: (a||'').trim() || '其他作者',
+        f: (f||'').trim() || '常態時令',
+        p: (p||'').trim(),
+        r: (rec||'').trim() || '其他/未註明'
+      });
+    }
+    return out;
+  }
+
+  const els = {
+    loadingState: document.getElementById('loadingState'),
+    errorState: document.getElementById('errorState'),
+    errorMsg: document.getElementById('errorMsg'),
+    retryBtn: document.getElementById('retryBtn'),
+    resultsWrap: document.getElementById('results'),
+    syncStatus: document.getElementById('syncStatus'),
+    refreshBtn: document.getElementById('refreshBtn'),
+  };
+
+  function setSyncStatus(msg){ els.syncStatus.textContent = msg; }
+
+  function loadData(){
+    els.loadingState.style.display = 'block';
+    els.errorState.style.display = 'none';
+    els.resultsWrap.style.display = 'none';
+    els.refreshBtn.style.display = 'none';
+    setSyncStatus('正在連線 Google 試算表…');
+
+    fetch(CSV_URL, { cache: 'no-store' })
+      .then(resp => {
+        if(!resp.ok) throw new Error('HTTP ' + resp.status);
+        return resp.text();
+      })
+      .then(text => {
+        const rows = parseCSV(text);
+        const data = rowsToData(rows);
+        if(data.length === 0) throw new Error('試算表沒有可用資料');
+        initApp(data);
+        const now = new Date();
+        setSyncStatus('已同步最新資料・' + now.toLocaleTimeString('zh-TW', {hour:'2-digit', minute:'2-digit'}));
+        els.refreshBtn.style.display = 'inline';
+        els.loadingState.style.display = 'none';
+        els.resultsWrap.style.display = 'flex';
+      })
+      .catch(err => {
+        els.loadingState.style.display = 'none';
+        els.errorState.style.display = 'block';
+        els.errorMsg.textContent = '讀取試算表失敗（' + err.message + '）。請確認試算表分享設定為「知道連結的任何人可檢視」。';
+        setSyncStatus('連線失敗');
+      });
+  }
+
+  els.retryBtn.addEventListener('click', loadData);
+  els.refreshBtn.addEventListener('click', loadData);
+
+  function initApp(DATA){
+  const els = {
+    q: document.getElementById('q'),
+    fAuthor: document.getElementById('fAuthor'),
+    fReciter: document.getElementById('fReciter'),
+    fFestival: document.getElementById('fFestival'),
+    results: document.getElementById('results'),
+    countNum: document.getElementById('countNum'),
+    clearBtn: document.getElementById('clearBtn'),
+    sentinel: document.getElementById('sentinel'),
+    loadingMore: document.getElementById('loadingMore'),
+  };
+
+  function uniqueSorted(key){
+    const counts = new Map();
+    DATA.forEach(d => counts.set(d[key], (counts.get(d[key])||0)+1));
+    return [...counts.entries()].sort((a,b)=> b[1]-a[1]);
+  }
+
+  function fillSelect(sel, key, allLabel){
+    uniqueSorted(key).forEach(([val, count])=>{
+      const opt = document.createElement('option');
+      opt.value = val;
+      opt.textContent = `${val} (${count})`;
+      sel.appendChild(opt);
+    });
+  }
+  fillSelect(els.fAuthor, 'a');
+  fillSelect(els.fReciter, 'r');
+  fillSelect(els.fFestival, 'f');
+
+  function escapeHtml(s){
+    return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function highlight(text, term){
+    if(!term) return escapeHtml(text);
+    const idx = text.toLowerCase().indexOf(term.toLowerCase());
+    if(idx === -1) return escapeHtml(text);
+    return escapeHtml(text.slice(0,idx)) + '<mark style="background:rgba(166,51,43,0.18);color:inherit;border-radius:3px;">' + escapeHtml(text.slice(idx, idx+term.length)) + '</mark>' + escapeHtml(text.slice(idx+term.length));
+  }
+
+  let filtered = DATA;
+  let renderCount = 0;
+  const PAGE = 40;
+
+  function applyFilters(){
+    const term = els.q.value.trim().toLowerCase();
+    const author = els.fAuthor.value;
+    const reciter = els.fReciter.value;
+    const festival = els.fFestival.value;
+
+    filtered = DATA.filter(d=>{
+      if(author && d.a !== author) return false;
+      if(reciter && d.r !== reciter) return false;
+      if(festival && d.f !== festival) return false;
+      if(term){
+        const hay = (d.p + ' ' + d.t + ' ' + d.a + ' ' + d.r).toLowerCase();
+        if(!hay.includes(term)) return false;
+      }
+      return true;
+    });
+
+    els.countNum.textContent = filtered.length;
+    renderCount = 0;
+    els.results.innerHTML = '';
+    renderMore();
+
+    [els.fAuthor, els.fReciter, els.fFestival].forEach(sel=>{
+      sel.classList.toggle('active', !!sel.value);
+    });
+  }
+
+  function cardHtml(d, term){
+    const poem = d.p || d.t;
+    const badges = [];
+    if(d.f && d.f !== '常態時令'){
+      badges.push(`<span class="badge festival">${escapeHtml(d.f)}</span>`);
+    }
+    return `
+      <a class="card" href="${escapeHtml(d.u)}" target="_blank" rel="noopener">
+        <div class="card-top">
+          <span class="poem-title">${highlight(poem, term)}</span>
+          <span class="author-tag">${highlight(d.a, term)}</span>
+        </div>
+        <div class="orig-title">${highlight(d.t, term)}</div>
+        <div class="card-bottom">
+          <div class="badges">
+            <span class="badge">${highlight(d.r, term)}</span>
+            ${badges.join('')}
+          </div>
+          <span class="go">觀看影片 ↗</span>
+        </div>
+      </a>`;
+  }
+
+  function renderMore(){
+    const term = els.q.value.trim();
+    const slice = filtered.slice(renderCount, renderCount + PAGE);
+    if(slice.length === 0 && renderCount === 0){
+      els.results.innerHTML = `
+        <div class="empty">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="1.5" stroke-linecap="round"><path d="M4 19V5a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+          <p>查無吟唱・換個關鍵字試試</p>
+        </div>`;
+      els.loadingMore.style.display = 'none';
+      return;
+    }
+    const html = slice.map(d => cardHtml(d, term)).join('');
+    els.results.insertAdjacentHTML('beforeend', html);
+    renderCount += slice.length;
+    els.loadingMore.style.display = (renderCount < filtered.length) ? 'block' : 'none';
+  }
+
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting && renderCount < filtered.length){
+        renderMore();
+      }
+    });
+  }, { rootMargin: '400px' });
+  io.observe(els.sentinel);
+
+  let debounceTimer;
+  els.q.addEventListener('input', ()=>{
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(applyFilters, 120);
+  });
+  els.fAuthor.addEventListener('change', applyFilters);
+  els.fReciter.addEventListener('change', applyFilters);
+  els.fFestival.addEventListener('change', applyFilters);
+  els.clearBtn.addEventListener('click', ()=>{
+    els.q.value = '';
+    els.fAuthor.value = '';
+    els.fReciter.value = '';
+    els.fFestival.value = '';
+    applyFilters();
+  });
+
+  applyFilters();
+  } // end initApp
+
+  loadData();
+})();
+</script>
+</body>
+</html>
