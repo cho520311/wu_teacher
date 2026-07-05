@@ -347,9 +347,9 @@
 (function(){
   // ---- Google 試算表設定 ----
   // 試算表 ID 與分頁 gid，取自你提供的分享連結
-  const SHEET_ID = '1AQbT-pYd9J2FrKw4WLLm0-X391ngJXI7uzjMAZrzvAE';
-  const GID = '0';
-  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}&_t=` + Date.now();
+  // 試算表「發布到網路」產生的正式 CSV 連結（不會有型態猜測漏資料的問題）
+  const PUBLISHED_CSV_BASE = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQfkQ0CIpNkvCbSp-BgMqmdpGHxSYIfgD90qmLyZQch6ZrspZa7fPbPydZIMlqZSnuaXVTVKn1YryjM/pub?gid=0&single=true&output=csv';
+  const CSV_URL = PUBLISHED_CSV_BASE + '&_t=' + Date.now();
 
   // 簡易但完整的 CSV 解析器：支援雙引號欄位、欄位內逗號與換行
   function parseCSV(text){
